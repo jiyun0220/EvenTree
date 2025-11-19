@@ -158,7 +158,7 @@ export default function Home() {
                   item["공연시작일"] ||
                   item["startDate"] ||
                   "";
-                
+
                 if (!title || !isWithinLastYear(startDate)) {
                   return null;
                 }
@@ -350,6 +350,16 @@ export default function Home() {
             />
             <span className="text-[#888888] text-xl">🔍</span>
           </div>
+          <button
+            onClick={() => {
+              // TODO: 언어 전환 로직 추가
+              toast.success("이소에 언어 전환 기능 추가해");
+            }}
+            className="flex items-center gap-2 px-4 py-2 border border-[#888888] rounded-lg hover:border-[#38b000] hover:bg-[#f0fdf4] transition-colors"
+            aria-label="언어 전환"
+          >
+            <span className="text-sm font-medium text-[#444444]">KO</span>
+          </button>
           <button
             onClick={() => navigate("/calendar")}
             className="flex items-center justify-center w-10 h-10 rounded-full bg-[#38b000] hover:bg-[#2d8c00] transition-colors"

@@ -58,16 +58,35 @@ export default function EventDetail() {
         Papa.parse(csvText, {
           header: true,
           skipEmptyLines: true,
-          transformHeader: (header: string) => header.replace(/_\d+$/, "").trim(),
+          transformHeader: (header: string) =>
+            header.replace(/_\d+$/, "").trim(),
           complete: (results) => {
             const itemIndex = parseInt(id || "0");
             const item = results.data[itemIndex] as any;
-            
+
             if (item) {
-              const content = item["행사내용"] || item["내용"] || item["설명"] || "";
+              const content =
+                item["행사내용"] || item["내용"] || item["설명"] || "";
               const categoryKeywords: { [key: string]: string[] } = {
-                대중음악: ["대중음악", "콘서트", "밴드", "가요", "힙합", "재즈", "록", "팝", "인디"],
-                클래식: ["클래식", "오케스트라", "심포니", "실내악", "독주회", "협주곡"],
+                대중음악: [
+                  "대중음악",
+                  "콘서트",
+                  "밴드",
+                  "가요",
+                  "힙합",
+                  "재즈",
+                  "록",
+                  "팝",
+                  "인디",
+                ],
+                클래식: [
+                  "클래식",
+                  "오케스트라",
+                  "심포니",
+                  "실내악",
+                  "독주회",
+                  "협주곡",
+                ],
                 무용: ["무용", "댄스", "발레", "현대무용", "한국무용", "춤"],
                 뮤지컬: ["뮤지컬", "오페라", "음악극"],
                 영화: ["영화", "상영", "시네마", "필름"],
@@ -89,7 +108,7 @@ export default function EventDetail() {
               }
 
               const imageName = categoryImageMap[category] || "etc";
-              
+
               setEvent({
                 seq: id || "0",
                 title: item["행사명"] || item["공연명"] || "",
@@ -139,7 +158,10 @@ export default function EventDetail() {
     if (!dateStr) return "";
     const cleaned = dateStr.replace(/[^0-9]/g, "");
     if (cleaned.length === 8) {
-      return `${cleaned.substring(0, 4)}.${cleaned.substring(4, 6)}.${cleaned.substring(6, 8)}`;
+      return `${cleaned.substring(0, 4)}.${cleaned.substring(
+        4,
+        6
+      )}.${cleaned.substring(6, 8)}`;
     }
     return dateStr;
   };
@@ -211,7 +233,9 @@ export default function EventDetail() {
             {/* 오른쪽: 상세 정보 */}
             <div className="flex flex-col gap-6">
               <div>
-                <h1 className="text-3xl font-bold text-[#222222] mb-4">{event.title}</h1>
+                <h1 className="text-3xl font-bold text-[#222222] mb-4">
+                  {event.title}
+                </h1>
                 <div className="flex items-center gap-2 text-[#888888] mb-2">
                   <span className="text-xl">📍</span>
                   <span>{event.place}</span>
@@ -229,7 +253,8 @@ export default function EventDetail() {
                     <div>
                       <p className="text-sm text-[#888888] mb-1">행사 기간</p>
                       <p className="text-lg text-[#222222]">
-                        {formatDate(event.startDate)} ~ {formatDate(event.endDate)}
+                        {formatDate(event.startDate)} ~{" "}
+                        {formatDate(event.endDate)}
                       </p>
                     </div>
                   )}
@@ -237,7 +262,9 @@ export default function EventDetail() {
                   {event.organizer && (
                     <div>
                       <p className="text-sm text-[#888888] mb-1">주최/주관</p>
-                      <p className="text-lg text-[#222222]">{event.organizer}</p>
+                      <p className="text-lg text-[#222222]">
+                        {event.organizer}
+                      </p>
                     </div>
                   )}
 
@@ -280,8 +307,14 @@ export default function EventDetail() {
                       type="date"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
-                      min={new Date().toISOString().split("T")[0]}
-                      max={event.endDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3")}
+                      min={event.startDate.replace(
+                        /(\d{4})(\d{2})(\d{2})/,
+                        "$1-$2-$3"
+                      )}
+                      max={event.endDate.replace(
+                        /(\d{4})(\d{2})(\d{2})/,
+                        "$1-$2-$3"
+                      )}
                       className="flex-1 px-4 py-3 border border-[#888888] rounded-lg focus:outline-none focus:border-[#38b000]"
                     />
                     <button
@@ -299,7 +332,9 @@ export default function EventDetail() {
           {/* 행사 내용 */}
           {event.content && (
             <div className="border-t border-gray-200 p-8">
-              <h2 className="text-2xl font-bold text-[#222222] mb-4">행사 소개</h2>
+              <h2 className="text-2xl font-bold text-[#222222] mb-4">
+                행사 소개
+              </h2>
               <p className="text-[#444444] leading-relaxed whitespace-pre-wrap">
                 {event.content}
               </p>
@@ -307,7 +342,7 @@ export default function EventDetail() {
           )}
 
           {/* 위치 정보 */}
-          {(event.gpsX && event.gpsY) && (
+          {event.gpsX && event.gpsY && (
             <div className="border-t border-gray-200 p-8">
               <h2 className="text-2xl font-bold text-[#222222] mb-4">위치</h2>
               <div className="bg-gray-100 rounded-lg p-4 text-center">

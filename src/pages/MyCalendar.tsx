@@ -50,7 +50,9 @@ export default function MyCalendar() {
     },
   ]);
 
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null
+  );
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDate, setEditDate] = useState("");
   const [editTime, setEditTime] = useState("");
@@ -99,7 +101,8 @@ export default function MyCalendar() {
   // 이벤트 스타일
   const eventStyleGetter = useCallback(
     (event: any) => {
-      const color = categoryColors[event.resource.category] || categoryColors["기타"];
+      const color =
+        categoryColors[event.resource.category] || categoryColors["기타"];
       return {
         style: {
           backgroundColor: color,
@@ -139,7 +142,9 @@ export default function MyCalendar() {
     // TODO: 서버 API 호출
     setEvents(
       events.map((event) =>
-        event.id === editingId ? { ...event, date: editDate, time: editTime } : event
+        event.id === editingId
+          ? { ...event, date: editDate, time: editTime }
+          : event
       )
     );
     setEditingId(null);
@@ -226,7 +231,10 @@ export default function MyCalendar() {
         ) : (
           <>
             {/* 캘린더 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-6" style={{ height: "700px" }}>
+            <div
+              className="bg-white rounded-xl shadow-lg p-6 mb-6"
+              style={{ height: "700px" }}
+            >
               <Calendar
                 localizer={localizer}
                 events={calendarEvents}
@@ -256,7 +264,9 @@ export default function MyCalendar() {
 
             {/* 카테고리 범례 */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-bold text-[#222222] mb-4">카테고리</h3>
+              <h3 className="text-lg font-bold text-[#222222] mb-4">
+                카테고리
+              </h3>
               <div className="flex flex-wrap gap-4">
                 {Object.entries(categoryColors).map(([category, color]) => (
                   <div key={category} className="flex items-center gap-2">
@@ -290,7 +300,8 @@ export default function MyCalendar() {
                     className="px-3 py-1 rounded-full text-xs font-semibold text-white"
                     style={{
                       backgroundColor:
-                        categoryColors[selectedEvent.category] || categoryColors["기타"],
+                        categoryColors[selectedEvent.category] ||
+                        categoryColors["기타"],
                     }}
                   >
                     {selectedEvent.category}
