@@ -16,11 +16,30 @@ interface PerformanceEvent {
   category: string;
 }
 
-const categories = ["전체", "대중음악", "클래식", "무용", "뮤지컬", "영화", "개그쇼", "기타"];
+const categories = [
+  "전체",
+  "대중음악",
+  "클래식",
+  "무용",
+  "뮤지컬",
+  "영화",
+  "개그쇼",
+  "기타",
+];
 
 // 카테고리 매칭 키워드
 const categoryKeywords: { [key: string]: string[] } = {
-  대중음악: ["대중음악", "콘서트", "밴드", "가요", "힙합", "재즈", "록", "팝", "인디"],
+  대중음악: [
+    "대중음악",
+    "콘서트",
+    "밴드",
+    "가요",
+    "힙합",
+    "재즈",
+    "록",
+    "팝",
+    "인디",
+  ],
   클래식: ["클래식", "오케스트라", "심포니", "실내악", "독주회", "협주곡"],
   무용: ["무용", "댄스", "발레", "현대무용", "한국무용", "춤"],
   뮤지컬: ["뮤지컬", "오페라", "음악극"],
@@ -32,7 +51,7 @@ const categoryKeywords: { [key: string]: string[] } = {
 // 행사내용으로 카테고리 판별
 const getCategoryFromContent = (content: string): string => {
   const lowerContent = content.toLowerCase();
-  
+
   for (const [category, keywords] of Object.entries(categoryKeywords)) {
     if (category === "기타") continue;
     for (const keyword of keywords) {
@@ -41,13 +60,25 @@ const getCategoryFromContent = (content: string): string => {
       }
     }
   }
-  
+
   return "기타";
+};
+
+// 카테고리 한글-영문 매핑
+const categoryImageMap: { [key: string]: string } = {
+  대중음악: "pop-music",
+  클래식: "classic",
+  무용: "dance",
+  뮤지컬: "musical",
+  영화: "movie",
+  개그쇼: "comedy",
+  기타: "etc",
 };
 
 // 카테고리별 이미지 경로
 const getCategoryImage = (category: string): string => {
-  return `/category/${category}.png`;
+  const imageName = categoryImageMap[category] || "etc";
+  return `/category/${imageName}.svg`;
 };
 
 export default function Home() {
@@ -128,12 +159,18 @@ export default function Home() {
                 return title && isWithinLastYear(startDate);
               })
               .map((item: any, index: number) => {
-                const content = item["행사내용"] || item["내용"] || item["설명"] || item["행사명"] || "";
+                const content =
+                  item["행사내용"] ||
+                  item["내용"] ||
+                  item["설명"] ||
+                  item["행사명"] ||
+                  "";
                 const category = getCategoryFromContent(content);
-                
+
                 return {
                   seq: String(index + 1),
-                  title: item["행사명"] || item["공연명"] || item["title"] || "",
+                  title:
+                    item["행사명"] || item["공연명"] || item["title"] || "",
                   startDate:
                     item["행사시작일자"] ||
                     item["공연시작일"] ||
@@ -268,7 +305,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-b from-white to-[rgba(56,176,0,0.1)]">
+    <div className="relative min-h-screen w-full bg-gradient-to-b from-white to-[rgba(56,176,0,0.1)] overflow-x-hidden">
       {/* 배경 나무 이미지 - 가장 뒤 */}
       <div className="fixed bottom-[-180px] left-0 right-0 z-0 pointer-events-none">
         <img
@@ -279,13 +316,13 @@ export default function Home() {
       </div>
 
       {/* 배경 장식 이미지들 */}
-      <div className="absolute left-[-111px] top-[625px] h-[538px] w-[692px] opacity-50 pointer-events-none z-[1]">
+      <div className="fixed left-[-111px] top-[625px] h-[538px] w-[692px] opacity-50 pointer-events-none z-[1]">
         <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-300 rounded-full blur-3xl" />
       </div>
-      <div className="absolute left-[419px] top-[719px] h-[538px] w-[692px] opacity-30 pointer-events-none z-[1]">
+      <div className="fixed left-[419px] top-[719px] h-[538px] w-[692px] opacity-30 pointer-events-none z-[1]">
         <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-300 rounded-full blur-3xl" />
       </div>
-      <div className="absolute left-[930px] top-[556px] h-[538px] w-[692px] opacity-70 pointer-events-none z-[1]">
+      <div className="fixed left-[930px] top-[556px] h-[538px] w-[692px] opacity-70 pointer-events-none z-[1]">
         <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-300 rounded-full blur-3xl" />
       </div>
 
@@ -332,31 +369,31 @@ export default function Home() {
         </div>
 
         {/* 이벤트 카드 목록 */}
-        <div className="flex gap-[30px] overflow-x-auto pb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-4">
           {loading ? (
-            <div className="flex items-center justify-center w-full py-20">
+            <div className="col-span-full flex items-center justify-center w-full py-20">
               <p className="text-xl text-[#38b000]">로딩 중...</p>
             </div>
           ) : displayedEvents.length === 0 ? (
-            <div className="flex items-center justify-center w-full py-20">
+            <div className="col-span-full flex items-center justify-center w-full py-20">
               <p className="text-xl text-[#888888]">공연 정보가 없습니다.</p>
             </div>
           ) : (
             displayedEvents.map((event: PerformanceEvent, index: number) => (
               <div
                 key={event.seq}
-                className={`flex shrink-0 flex-col gap-[30px] rounded-[10px] border p-[30px] transition-all hover:shadow-lg ${
+                className={`flex flex-col gap-[20px] rounded-[10px] border p-[20px] transition-all hover:shadow-lg ${
                   index === 0
                     ? "border-[#38b000] bg-white"
                     : "border-[#888888] bg-white hover:border-[#38b000]"
                 }`}
               >
-                <div className="h-[250px] w-[200px] overflow-hidden rounded-[10px] border border-[#888888]/50 bg-gradient-to-br from-gray-100 to-gray-200">
+                <div className="w-full aspect-[4/5] overflow-hidden rounded-[10px] border border-[#888888]/50 bg-gradient-to-br from-white to-gray-50 flex items-center justify-center p-4">
                   {event.thumbnail ? (
                     <img
                       src={event.thumbnail}
-                      alt={event.title}
-                      className="h-full w-full object-cover"
+                      alt={event.category}
+                      className="max-w-full max-h-full object-contain"
                       onError={(e) => {
                         e.currentTarget.style.display = "none";
                       }}
@@ -370,14 +407,16 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-                <div className="w-[200px]">
+                <div className="w-full">
                   <div className="inline-block px-2 py-1 bg-[#38b000]/10 text-[#38b000] text-xs rounded-full mb-2">
                     {event.category}
                   </div>
-                  <p className="text-[20px] text-[#222222] line-clamp-2 mb-2">
+                  <p className="text-[18px] text-[#222222] line-clamp-2 mb-2 font-medium">
                     {event.title}
                   </p>
-                  <p className="text-sm text-[#888888]">{event.place}</p>
+                  <p className="text-sm text-[#888888] line-clamp-1">
+                    {event.place}
+                  </p>
                   <p className="text-xs text-[#888888] mt-1">
                     {event.startDate} ~ {event.endDate}
                   </p>
