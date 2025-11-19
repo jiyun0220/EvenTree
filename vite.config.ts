@@ -13,11 +13,11 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api/, ""),
         secure: false,
         configure: (proxy, options) => {
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log('Proxying to:', proxyReq.path);
+          proxy.on("proxyReq", (proxyReq, req, res) => {
+            console.log("Proxying to:", proxyReq.path);
           });
-          proxy.on('proxyRes', (proxyRes, req, res) => {
-            console.log('Response status:', proxyRes.statusCode);
+          proxy.on("proxyRes", (proxyRes, req, res) => {
+            console.log("Response status:", proxyRes.statusCode);
           });
         },
       },

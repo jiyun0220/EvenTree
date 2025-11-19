@@ -42,15 +42,18 @@ export const getPerformanceList = async (params?: {
   eventCode?: string;
 }) => {
   try {
-    const response = await publicDataApi.get("/openapi/tn_pubr_public_pblprfr_event_info_api", {
-      params: {
-        serviceKey: import.meta.env.VITE_PUBLIC_DATA_API_KEY || "",
-        pageNo: params?.pageNo || 1,
-        numOfRows: params?.numOfRows || 10,
-        type: "json",
-        eventCode: params?.eventCode || "",
-      },
-    });
+    const response = await publicDataApi.get(
+      "/openapi/tn_pubr_public_pblprfr_event_info_api",
+      {
+        params: {
+          serviceKey: import.meta.env.VITE_PUBLIC_DATA_API_KEY || "",
+          pageNo: params?.pageNo || 1,
+          numOfRows: params?.numOfRows || 10,
+          type: "json",
+          eventCode: params?.eventCode || "",
+        },
+      }
+    );
     console.log("Raw API Response:", response.data);
     return response.data;
   } catch (error) {

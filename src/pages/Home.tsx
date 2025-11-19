@@ -13,15 +13,52 @@ interface PerformanceEvent {
   thumbnail: string;
   gpsX: string;
   gpsY: string;
+  category: string;
 }
 
-const categories = ["전체", "음악", "미술", "공연", "건축", "영화", "문학"];
+const categories = ["전체", "대중음악", "클래식", "무용", "뮤지컬", "영화", "개그쇼", "기타"];
+
+// 카테고리 매칭 키워드
+const categoryKeywords: { [key: string]: string[] } = {
+  대중음악: ["대중음악", "콘서트", "밴드", "가요", "힙합", "재즈", "록", "팝", "인디"],
+  클래식: ["클래식", "오케스트라", "심포니", "실내악", "독주회", "협주곡"],
+  무용: ["무용", "댄스", "발레", "현대무용", "한국무용", "춤"],
+  뮤지컬: ["뮤지컬", "오페라", "음악극"],
+  영화: ["영화", "상영", "시네마", "필름"],
+  개그쇼: ["개그", "코미디", "개그쇼", "토크쇼"],
+  기타: [],
+};
+
+// 행사내용으로 카테고리 판별
+const getCategoryFromContent = (content: string): string => {
+  const lowerContent = content.toLowerCase();
+  
+  for (const [category, keywords] of Object.entries(categoryKeywords)) {
+    if (category === "기타") continue;
+    for (const keyword of keywords) {
+      if (lowerContent.includes(keyword.toLowerCase())) {
+        return category;
+      }
+    }
+  }
+  
+  return "기타";
+};
+
+// 카테고리별 이미지 경로
+const getCategoryImage = (category: string): string => {
+  return `/category/${category}.png`;
+};
 
 export default function Home() {
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(["전체"]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([
+    "전체",
+  ]);
   const [searchQuery, setSearchQuery] = useState("");
   const [allEvents, setAllEvents] = useState<PerformanceEvent[]>([]);
-  const [displayedEvents, setDisplayedEvents] = useState<PerformanceEvent[]>([]);
+  const [displayedEvents, setDisplayedEvents] = useState<PerformanceEvent[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -57,7 +94,7 @@ export default function Home() {
       try {
         const response = await fetch("/events.csv");
         const buffer = await response.arrayBuffer();
-        
+
         // EUC-KR 디코딩 시도, 실패하면 UTF-8
         let csvText: string;
         try {
@@ -78,25 +115,49 @@ export default function Home() {
           complete: (results) => {
             console.log("CSV 파싱 결과 (처음 5개):", results.data.slice(0, 5));
             console.log("헤더:", results.meta.fields);
-            
+
             const parsedEvents: PerformanceEvent[] = results.data
               .filter((item: any) => {
-                const title = item["행사명"] || item["공연명"] || item["title"] || "";
-                const startDate = item["행사시작일자"] || item["공연시작일"] || item["startDate"] || "";
+                const title =
+                  item["행사명"] || item["공연명"] || item["title"] || "";
+                const startDate =
+                  item["행사시작일자"] ||
+                  item["공연시작일"] ||
+                  item["startDate"] ||
+                  "";
                 return title && isWithinLastYear(startDate);
               })
-              .map((item: any, index: number) => ({
-                seq: String(index + 1),
-                title: item["행사명"] || item["공연명"] || item["title"] || "",
-                startDate: item["행사시작일자"] || item["공연시작일"] || item["startDate"] || "",
-                endDate: item["행사종료일자"] || item["공연종료일"] || item["endDate"] || "",
-                place: item["개최장소"] || item["공연장소"] || item["place"] || "",
-                realmName: item["문화행사구분명"] || item["구분"] || "",
-                area: item["소재지도로명주소"] || item["소재지지번주소"] || item["주소"] || "",
-                thumbnail: "",
-                gpsX: item["경도"] || item["longitude"] || "",
-                gpsY: item["위도"] || item["latitude"] || "",
-              }))
+              .map((item: any, index: number) => {
+                const content = item["행사내용"] || item["내용"] || item["설명"] || item["행사명"] || "";
+                const category = getCategoryFromContent(content);
+                
+                return {
+                  seq: String(index + 1),
+                  title: item["행사명"] || item["공연명"] || item["title"] || "",
+                  startDate:
+                    item["행사시작일자"] ||
+                    item["공연시작일"] ||
+                    item["startDate"] ||
+                    "",
+                  endDate:
+                    item["행사종료일자"] ||
+                    item["공연종료일"] ||
+                    item["endDate"] ||
+                    "",
+                  place:
+                    item["개최장소"] || item["공연장소"] || item["place"] || "",
+                  realmName: item["문화행사구분명"] || item["구분"] || "",
+                  area:
+                    item["소재지도로명주소"] ||
+                    item["소재지지번주소"] ||
+                    item["주소"] ||
+                    "",
+                  thumbnail: getCategoryImage(category),
+                  gpsX: item["경도"] || item["longitude"] || "",
+                  gpsY: item["위도"] || item["latitude"] || "",
+                  category: category,
+                };
+              })
               .sort((a, b) => {
                 // 최신순 정렬
                 const dateA = parseDate(a.startDate);
@@ -111,9 +172,11 @@ export default function Home() {
             setDisplayedEvents(parsedEvents.slice(0, ITEMS_PER_PAGE));
             setPage(1);
             setHasMore(parsedEvents.length > ITEMS_PER_PAGE);
-            
+
             if (parsedEvents.length > 0) {
-              toast.success(`${parsedEvents.length}개의 공연 정보를 불러왔습니다!`);
+              toast.success(
+                `${parsedEvents.length}개의 공연 정보를 불러왔습니다!`
+              );
             } else {
               toast.error("공연 정보가 없습니다.");
             }
@@ -140,8 +203,8 @@ export default function Home() {
   useEffect(() => {
     const handleScroll = () => {
       if (
-        window.innerHeight + document.documentElement.scrollTop
-        >= document.documentElement.offsetHeight - 500
+        window.innerHeight + document.documentElement.scrollTop >=
+        document.documentElement.offsetHeight - 500
       ) {
         if (!loading && hasMore) {
           loadMore();
@@ -157,10 +220,10 @@ export default function Home() {
     const nextPage = page + 1;
     const startIndex = nextPage * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    
+
     const filteredEvents = filterEvents(allEvents);
     const newEvents = filteredEvents.slice(startIndex, endIndex);
-    
+
     if (newEvents.length > 0) {
       setDisplayedEvents((prev) => [...prev, ...newEvents]);
       setPage(nextPage);
@@ -173,10 +236,12 @@ export default function Home() {
   // 카테고리 및 검색 필터링
   const filterEvents = (events: PerformanceEvent[]) => {
     return events.filter((event) => {
-      const matchesSearch = event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchesSearch =
+        event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         event.place.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = selectedCategories.includes("전체") || 
-        selectedCategories.some(cat => event.realmName.includes(cat));
+      const matchesCategory =
+        selectedCategories.includes("전체") ||
+        selectedCategories.some((cat) => event.category === cat);
       return matchesSearch && matchesCategory;
     });
   };
@@ -286,17 +351,29 @@ export default function Home() {
                     : "border-[#888888] bg-white hover:border-[#38b000]"
                 }`}
               >
-                <div className="h-[250px] w-[200px] overflow-hidden rounded-[10px] border border-[#888888]/50 bg-gray-100">
-                  <img
-                    src={event.thumbnail || "https://via.placeholder.com/200x250/cccccc/666666?text=No+Image"}
-                    alt={event.title}
-                    className="h-full w-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "https://via.placeholder.com/200x250/cccccc/666666?text=No+Image";
-                    }}
-                  />
+                <div className="h-[250px] w-[200px] overflow-hidden rounded-[10px] border border-[#888888]/50 bg-gradient-to-br from-gray-100 to-gray-200">
+                  {event.thumbnail ? (
+                    <img
+                      src={event.thumbnail}
+                      alt={event.title}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center text-gray-400">
+                      <div className="text-center">
+                        <div className="text-6xl mb-2">🎭</div>
+                        <div className="text-sm">No Image</div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="w-[200px]">
+                  <div className="inline-block px-2 py-1 bg-[#38b000]/10 text-[#38b000] text-xs rounded-full mb-2">
+                    {event.category}
+                  </div>
                   <p className="text-[20px] text-[#222222] line-clamp-2 mb-2">
                     {event.title}
                   </p>
@@ -309,7 +386,7 @@ export default function Home() {
             ))
           )}
         </div>
-        
+
         {/* 무한 스크롤 로딩 인디케이터 */}
         {!loading && hasMore && (
           <div className="flex items-center justify-center w-full py-10">
