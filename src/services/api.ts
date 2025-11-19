@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios from "axios";
 
 // 공공데이터 API 기본 설정
 // TODO: 실제 사용할 공공데이터 API의 serviceKey를 .env 파일에 추가하세요
 const publicDataApi = axios.create({
-  baseURL: 'https://apis.data.go.kr', // 기본 URL (실제 API에 맞게 수정)
+  baseURL: "https://apis.data.go.kr", // 기본 URL (실제 API에 맞게 수정)
   timeout: 10000,
   params: {
     serviceKey: import.meta.env.VITE_PUBLIC_DATA_API_KEY,
