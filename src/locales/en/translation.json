@@ -10,5 +10,19 @@
   "개그쇼": "Comedy show",
   "기타": "Etc",
 
+  "backBtn": "Go back",
+
+  "eventPeriod": "Event Period",
+  "organizer": "Organizer",
+  "fee": "Fee",
+  "contactPhone": "Contact Phone",
+  "homepage": "Homepage",
+  "goToHomepage": "Go to Homepage",
+  "addToCalendar": "Add to Calendar",
+  "eventDescription": "Event Description",
+  "location": "Location",
+  "add": "Add",
+  "adding": "Adding...",
+
   "greeting":"welcome, {{email}} 님!"
 }

@@ -98,6 +98,13 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const ITEMS_PER_PAGE = 20;
 
+  // 다국어 지원
+  const { i18n } = useTranslation();
+  const { t } = useTranslation();
+  const changeLanguage = (lng: "en" | "ko") => {
+    i18n.changeLanguage(lng);
+  };
+
   // 날짜 파싱 함수
   const parseDate = (dateStr: string): Date | null => {
     if (!dateStr) return null;
@@ -310,16 +317,6 @@ export default function Home() {
     }
   };
 
-  // 다국어 지원
-  const { i18n } = useTranslation();
-
-  const changeLanguage = (lng: "en" | "ko") => {
-    i18n.changeLanguage(lng);
-  };
-
-  const { t } = useTranslation();
-  // <h2>{t('login')}</h2> 와 같이 사용 가능
-
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-b from-white to-[rgba(56,176,0,0.1)] overflow-x-hidden">
       {/* 배경 나무 이미지 - 가장 뒤 */}
@@ -343,7 +340,7 @@ export default function Home() {
       </div>
 
       {/* 헤더 */}
-      <header className="relative z-10 flex items-center border-b border-[#888888]/30 bg-white px-10 py-4">
+      <header className="fixed top-0 left-0 w-full z-100 flex items-center border-b border-[#888888]/30 bg-white px-10 py-4">
         <img
           src="/logo.png"
           alt="EvenTree Logo"
@@ -354,7 +351,7 @@ export default function Home() {
           <div className="flex items-center gap-2 rounded-full border border-[#888888] bg-white px-4 py-2 w-[615px]">
             <input
               type="text"
-              placeholder={t('searching')}
+              placeholder={t("searching")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="flex-1 text-sm outline-none"
@@ -382,7 +379,7 @@ export default function Home() {
       </header>
 
       {/* 메인 콘텐츠 */}
-      <main className="relative z-10 px-10 py-8">
+      <main className="relative z-10 px-10 py-30">
         {/* 카테고리 필터 */}
         <div className="flex gap-5 mb-12">
           {categories.map((category) => {

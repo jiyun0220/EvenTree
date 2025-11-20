@@ -7,6 +7,7 @@ import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ko } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../calendar.css";
+import { useTranslation } from "react-i18next";
 
 interface CalendarEvent {
   id: string;
@@ -21,6 +22,13 @@ interface CalendarEvent {
 
 export default function MyCalendar() {
   const navigate = useNavigate();
+  
+  // 다국어 지원
+  const { i18n } = useTranslation();
+  const { t } = useTranslation();
+  const changeLanguage = (lng: "en" | "ko") => {
+    i18n.changeLanguage(lng);
+  };
 
   // 더미 데이터 (추후 서버 연결 시 제거)
   const [events, setEvents] = useState<CalendarEvent[]>([
@@ -177,33 +185,46 @@ export default function MyCalendar() {
   };
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="min-h-screen overflow-x-hidden bg-white">
       {/* 배경 그라데이션 */}
       <div className="fixed left-[-200px] top-[-200px] h-[538px] w-[692px] opacity-70 pointer-events-none z-[1]">
-        <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-300 rounded-full blur-3xl" />
+        <div className="w-full h-full rounded-full bg-gradient-to-br from-green-200 to-green-300 blur-3xl" />
       </div>
 
       <div className="fixed right-[-100px] bottom-[-100px] h-[538px] w-[692px] opacity-70 pointer-events-none z-[1]">
-        <div className="w-full h-full bg-gradient-to-br from-green-200 to-green-300 rounded-full blur-3xl" />
+        <div className="w-full h-full rounded-full bg-gradient-to-br from-green-200 to-green-300 blur-3xl" />
       </div>
 
       {/* 헤더 */}
-      <header className="relative z-10 flex items-center border-b border-[#888888]/30 bg-white px-10 py-4">
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 hover:opacity-70 transition-opacity"
-        >
-          <span className="text-2xl">←</span>
-          <img
-            src="/logo.png"
-            alt="EvenTree Logo"
-            className="h-[40px] object-contain"
-          />
-        </button>
+      <header className="fixed top-0 left-0 w-full z-100 flex items-center border-b border-[#888888]/30 bg-white px-10 py-4">
+        <img
+          src="/logo.png"
+          alt="EvenTree Logo"
+          className="h-[40px] object-contain"
+        />
+        <div className="flex items-center gap-4 ml-auto">
+          {/* 언어 전환 버튼 */}
+          <button
+            onClick={() => changeLanguage(i18n.language === "ko" ? "en" : "ko")}
+            className="flex items-center gap-2 px-4 py-2 border border-[#888888] rounded-lg hover:border-[#38b000] hover:bg-[#f0fdf4] transition-colors"
+            aria-label="언어 전환"
+          >
+            <span className="text-sm font-medium text-[#444444]">
+              {i18n.language === "ko" ? "KO" : "EN"}{" "}
+            </span>
+          </button>
+          <button
+            onClick={() => navigate("/calendar")}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-[#38b000] hover:bg-[#2d8c00] transition-colors"
+            aria-label="내 캘린더"
+          >
+            <img src="/profile-icon.svg" alt="프로필" className="w-6 h-6" />
+          </button>
+        </div>
       </header>
 
       {/* 메인 콘텐츠 */}
-      <main className="relative z-10 max-w-7xl mx-auto px-10 py-8">
+      <main className="relative z-10 px-10 mx-30 auto py-30 max-w-7xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-[#222222] mb-2">내 캘린더</h1>
           <p className="text-[#888888]">
@@ -213,8 +234,8 @@ export default function MyCalendar() {
 
         {/* 일정이 없는 경우 */}
         {events.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">📅</div>
+          <div className="py-20 text-center">
+            <div className="mb-4 text-6xl">📅</div>
             <p className="text-xl text-[#888888] mb-2">
               저장된 일정이 없습니다
             </p>
@@ -232,7 +253,7 @@ export default function MyCalendar() {
           <>
             {/* 캘린더 */}
             <div
-              className="bg-white rounded-xl shadow-lg p-6 mb-6"
+              className="p-6 mb-6 bg-white shadow-lg rounded-xl"
               style={{ height: "700px" }}
             >
               <Calendar
@@ -263,7 +284,7 @@ export default function MyCalendar() {
             </div>
 
             {/* 카테고리 범례 */}
-            <div className="bg-white rounded-xl shadow-lg p-6">
+            <div className="p-6 bg-white shadow-lg rounded-xl">
               <h3 className="text-lg font-bold text-[#222222] mb-4">
                 카테고리
               </h3>
@@ -286,18 +307,18 @@ export default function MyCalendar() {
       {/* 이벤트 상세 모달 */}
       {selectedEvent && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
           onClick={handleCloseModal}
         >
           <div
-            className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4"
+            className="w-full max-w-md p-8 mx-4 bg-white shadow-2xl rounded-xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-6">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
                   <span
-                    className="px-3 py-1 rounded-full text-xs font-semibold text-white"
+                    className="px-3 py-1 text-xs font-semibold text-white rounded-full"
                     style={{
                       backgroundColor:
                         categoryColors[selectedEvent.category] ||
@@ -385,7 +406,7 @@ export default function MyCalendar() {
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="flex-1 px-4 py-2 bg-white border border-red-500 text-red-500 rounded-lg font-semibold hover:bg-red-500 hover:text-white transition-colors"
+                    className="flex-1 px-4 py-2 font-semibold text-red-500 transition-colors bg-white border border-red-500 rounded-lg hover:bg-red-500 hover:text-white"
                   >
                     삭제
                   </button>

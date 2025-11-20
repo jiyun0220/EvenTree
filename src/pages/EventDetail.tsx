@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Papa from "papaparse";
 import toast, { Toaster } from "react-hot-toast";
+import { useAddEvent } from "../hooks/useAddEvent";
+import { useEvents } from "../hooks/useEvents";
+import { useTranslation } from "react-i18next";
 
 interface PerformanceEvent {
   seq: string;
@@ -38,6 +41,28 @@ export default function EventDetail() {
   const [event, setEvent] = useState<PerformanceEvent | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState("");
+
+  // 다국어 지원
+  const { i18n } = useTranslation();
+  const { t } = useTranslation();
+  const changeLanguage = (lng: "en" | "ko") => {
+    i18n.changeLanguage(lng);
+  };
+
+  // 전체 이벤트 데이터 훅 불러오기 - 버튼 비활성화 및 중복 체크용
+  const { events } = useEvents();
+  // 버튼 비활성화 여부 확인
+  const [isDuplicate, setIsDuplicate] = useState(false);
+
+  useEffect(() => {
+    const duplicate = events.some(
+      (e) => e.title === event?.title && e.date === selectedDate
+    );
+    setIsDuplicate(duplicate);
+  }, [selectedDate, events, event]);
+
+  // 서버에서 이벤트 추가 훅 불러오기
+  const { add, loading: addEventLoading, error } = useAddEvent(); // useAddEvent 훅 호출
 
   useEffect(() => {
     const fetchEventDetail = async () => {
@@ -166,12 +191,26 @@ export default function EventDetail() {
     return dateStr;
   };
 
-  const handleAddToCalendar = () => {
+  const handleAddToCalendar = async () => {
     if (!selectedDate) {
       toast.error("날짜를 선택해주세요.");
       return;
     }
-    toast.success("일정이 추가되었습니다!");
+
+    if (!event) return;
+
+    try {
+      await add(event.title, selectedDate); // useAddEvent 훅의 add 함수 호출
+      toast.success("일정이 추가되었습니다!"); // 성공 시 토스트
+      setIsDuplicate(true); // 추가 후 중복 상태로 변경
+    } catch (err) {
+      if (err == "Error: 이미 같은 날짜와 이름의 일정이 존재합니다.") {
+        toast.error("이미 같은 날짜와 이름의 일정이 존재합니다."); // 중복 에러 토스트
+        return;
+      }
+      toast.error("일정 추가 중 오류가 발생했습니다."); // 실패 시 에러 토스트
+      console.error(err); // 콘솔에 에러 기록
+    }
   };
 
   if (loading) {
@@ -202,18 +241,44 @@ export default function EventDetail() {
       </div>
 
       {/* 헤더 */}
-      <header className="relative z-10 flex items-center justify-between px-10 py-8 bg-white/80 backdrop-blur-sm">
+      <header className="fixed top-0 left-0 w-full z-100 flex items-center border-b border-[#888888]/30 bg-white px-10 py-4">
+        <img
+          src="/logo.png"
+          alt="EvenTree Logo"
+          className="h-[40px] object-contain"
+        />
+        <div className="flex items-center gap-4 ml-auto">
+          {/* 언어 전환 버튼 */}
+          <button
+            onClick={() => changeLanguage(i18n.language === "ko" ? "en" : "ko")}
+            className="flex items-center gap-2 px-4 py-2 border border-[#888888] rounded-lg hover:border-[#38b000] hover:bg-[#f0fdf4] transition-colors"
+            aria-label="언어 전환"
+          >
+            <span className="text-sm font-medium text-[#444444]">
+              {i18n.language === "ko" ? "KO" : "EN"}{" "}
+            </span>
+          </button>
+          <button
+            onClick={() => navigate("/calendar")}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-[#38b000] hover:bg-[#2d8c00] transition-colors"
+            aria-label="내 캘린더"
+          >
+            <img src="/profile-icon.svg" alt="프로필" className="w-6 h-6" />
+          </button>
+        </div>
+      </header>
+      <div className="fixed left-0 flex items-center justify-between px-10 py-8 top-18 z-90 ">
         <button
           onClick={() => navigate("/")}
           className="flex items-center gap-2 text-[#38b000] hover:text-[#2d8c00] transition-colors"
         >
           <span className="text-2xl">←</span>
-          <img src="/logo.png" alt="EVENTREE" className="h-12" />
+          <span className="font-medium">{t("backBtn")}</span>
         </button>
-      </header>
+      </div>
 
       {/* 메인 콘텐츠 */}
-      <main className="relative z-10 max-w-6xl px-10 py-12 mx-auto">
+      <main className="relative z-10 max-w-6xl px-10 mx-auto py-30">
         <div className="bg-white rounded-[20px] shadow-lg overflow-hidden">
           <div className="grid gap-8 p-8 md:grid-cols-2">
             {/* 왼쪽: 이미지 */}
@@ -226,7 +291,7 @@ export default function EventDetail() {
                 />
               </div>
               <div className="inline-block px-4 py-2 bg-[#38b000]/10 text-[#38b000] text-sm rounded-full text-center">
-                {event.category}
+                {t(event.category)}
               </div>
             </div>
 
@@ -251,7 +316,9 @@ export default function EventDetail() {
                 <div className="grid gap-4">
                   {(event.startDate || event.endDate) && (
                     <div>
-                      <p className="text-sm text-[#888888] mb-1">행사 기간</p>
+                      <p className="text-sm text-[#888888] mb-1">
+                        {t("eventPeriod")}
+                      </p>
                       <p className="text-lg text-[#222222]">
                         {formatDate(event.startDate)} ~{" "}
                         {formatDate(event.endDate)}
@@ -261,7 +328,9 @@ export default function EventDetail() {
 
                   {event.organizer && (
                     <div>
-                      <p className="text-sm text-[#888888] mb-1">주최/주관</p>
+                      <p className="text-sm text-[#888888] mb-1">
+                        {t("organizer")}
+                      </p>
                       <p className="text-lg text-[#222222]">
                         {event.organizer}
                       </p>
@@ -270,28 +339,32 @@ export default function EventDetail() {
 
                   {event.fee && event.fee !== "무료" && (
                     <div>
-                      <p className="text-sm text-[#888888] mb-1">이용 요금</p>
+                      <p className="text-sm text-[#888888] mb-1">{t("fee")}</p>
                       <p className="text-lg text-[#222222]">{event.fee}</p>
                     </div>
                   )}
 
                   {event.phone && (
                     <div>
-                      <p className="text-sm text-[#888888] mb-1">문의 전화</p>
+                      <p className="text-sm text-[#888888] mb-1">
+                        {t("contactPhone")}
+                      </p>
                       <p className="text-lg text-[#222222]">{event.phone}</p>
                     </div>
                   )}
 
                   {event.website && (
                     <div>
-                      <p className="text-sm text-[#888888] mb-1">홈페이지</p>
+                      <p className="text-sm text-[#888888] mb-1">
+                        {t("homepage")}
+                      </p>
                       <a
                         href={event.website}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-lg text-[#38b000] hover:underline"
                       >
-                        바로가기
+                        {t("goToHomepage")}
                       </a>
                     </div>
                   )}
@@ -301,7 +374,9 @@ export default function EventDetail() {
               {/* 날짜 선택 및 추가 버튼 (미래 행사인 경우) */}
               {isUpcoming(event.startDate) && (
                 <div className="pt-6 mt-auto border-t border-gray-200">
-                  <p className="text-sm text-[#888888] mb-3">일정에 추가하기</p>
+                  <p className="text-sm text-[#888888] mb-3">
+                    {t("addToCalendar")}
+                  </p>
                   <div className="flex gap-3">
                     <input
                       type="date"
@@ -319,9 +394,15 @@ export default function EventDetail() {
                     />
                     <button
                       onClick={handleAddToCalendar}
-                      className="px-6 py-3 bg-[#38b000] text-white rounded-lg font-semibold hover:bg-[#2d8c00] transition-colors"
+                      disabled={isDuplicate || addEventLoading} // 중복 또는 등록중이면 비활성화
+                      className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                        isDuplicate || addEventLoading
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-[#38b000] text-white hover:bg-[#2d8c00]"
+                      }`}
                     >
-                      추가하기
+                      {addEventLoading ? t("adding") : t("add")}{" "}
+                      {/* 로딩 중이면 텍스트 변경 */}
                     </button>
                   </div>
                 </div>
@@ -333,7 +414,7 @@ export default function EventDetail() {
           {event.content && (
             <div className="p-8 border-t border-gray-200">
               <h2 className="text-2xl font-bold text-[#222222] mb-4">
-                행사 소개
+                {t("eventDescription")}
               </h2>
               <p className="text-[#444444] leading-relaxed whitespace-pre-wrap">
                 {event.content}
@@ -344,7 +425,9 @@ export default function EventDetail() {
           {/* 위치 정보 */}
           {event.gpsX && event.gpsY && (
             <div className="p-8 border-t border-gray-200">
-              <h2 className="text-2xl font-bold text-[#222222] mb-4">위치</h2>
+              <h2 className="text-2xl font-bold text-[#222222] mb-4">
+                {t("location")}
+              </h2>
               <div className="p-4 text-center bg-gray-100 rounded-lg">
                 <p className="text-[#888888]">
                   좌표: {event.gpsY}, {event.gpsX}

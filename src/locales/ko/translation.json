@@ -9,6 +9,20 @@
   "영화": "영화",
   "개그쇼": "개그쇼",
   "기타": "기타",
+
+  "backBtn": "뒤로가기",
+
+  "eventPeriod": "행사 기간",
+  "organizer": "주최/주관",
+  "fee": "이용 요금",
+  "contactPhone": "문의전화",
+  "homepage": "홈페이지",
+  "goToHomepage": "홈페이지로 이동",
+  "addToCalendar": "일정에 추가하기",
+  "eventDescription": "행사 소개",
+  "location": "위치",
+  "add": "추가하기",
+  "adding": "등록중...",
   
   "greeting":"환영합니다, {{email}} 님!"
 }
