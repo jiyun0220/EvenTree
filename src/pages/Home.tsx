@@ -421,12 +421,12 @@ export default function Home() {
                     : "border-[#888888] bg-white hover:border-[#38b000]"
                 }`}
               >
-                <div className="w-full aspect-[4/5] overflow-hidden rounded-[10px] border border-[#888888]/50 bg-gradient-to-br from-white to-gray-50 flex items-center justify-center p-4">
+                <div className="w-full aspect-[4/5] overflow-hidden rounded-[10px] border border-[#888888]/50 bg-gradient-to-br from-white to-gray-50 flex items-center justify-center">
                   {event.thumbnail ? (
                     <img
                       src={event.thumbnail}
                       alt={event.category}
-                      className="object-contain max-w-full max-h-full"
+                      className="object-cover w-full h-full"
                       onError={(e) => {
                         e.currentTarget.style.display = "none";
                       }}

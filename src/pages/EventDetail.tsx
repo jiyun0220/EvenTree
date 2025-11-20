@@ -284,11 +284,11 @@ export default function EventDetail() {
           <div className="grid gap-8 p-8 md:grid-cols-2">
             {/* 왼쪽: 이미지 */}
             <div className="flex flex-col gap-4">
-              <div className="w-full aspect-[3/4] bg-gradient-to-br from-white to-gray-50 rounded-[10px] border border-[#888888]/50 flex items-center justify-center p-8">
+              <div className="w-full aspect-[3/4] bg-gradient-to-br from-white to-gray-50 rounded-[10px] border border-[#888888]/50 overflow-hidden">
                 <img
                   src={event.thumbnail}
                   alt={event.category}
-                  className="object-contain max-w-full max-h-full"
+                  className="object-cover w-full h-full"
                 />
               </div>
               <div className="inline-block px-4 py-2 bg-[#38b000]/10 text-[#38b000] text-sm rounded-full text-center">
@@ -303,12 +303,13 @@ export default function EventDetail() {
                   {event.title}
                 </h1>
                 <div className="flex items-center gap-2 text-[#888888] mb-2">
-                  <span className="text-xl">📍</span>
                   <span>{event.place}</span>
                 </div>
                 {event.area && (
                   <div className="flex items-center gap-2 text-[#888888] text-sm mb-4">
-                    <span className="ml-7">{event.area}</span>
+                    <span>
+                      {t("location")}: {event.area}
+                    </span>
                   </div>
                 )}
               </div>
