@@ -4,10 +4,11 @@ import toast, { Toaster } from "react-hot-toast";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import type { View } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
-import { ko } from "date-fns/locale";
+import { enUS, ko } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../calendar.css";
 import { useTranslation } from "react-i18next";
+import type { Formats } from "react-big-calendar";
 
 interface CalendarEvent {
   id: string;
@@ -65,15 +66,33 @@ export default function MyCalendar() {
   const [editDate, setEditDate] = useState("");
   const [editTime, setEditTime] = useState("");
   const [view, setView] = useState<View>("month");
-
-  // date-fns localizer 설정
+  const locales = { "en-US": enUS, "ko-KR": ko };
+  
   const localizer = dateFnsLocalizer({
     format,
     parse,
-    startOfWeek: () => startOfWeek(new Date(), { locale: ko }),
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }),
     getDay,
-    locales: { ko },
+    locales,
   });
+  
+  const customFormats: Formats = {
+    weekdayFormat: (date: Date, culture?: string) => {
+      const weekdays = [
+        t("sun"),
+        t("mon"),
+        t("tue"),
+        t("wed"),
+        t("thu"),
+        t("fri"),
+        t("sat"),
+      ];
+      return weekdays[date.getDay()];
+    },
+    monthHeaderFormat: (date: Date, culture?: string) => {
+      return t(`${date.getMonth() + 1}`);
+    },
+  };
 
   // 캘린더 이벤트 형식으로 변환
   const calendarEvents = useMemo(() => {
@@ -206,7 +225,9 @@ export default function MyCalendar() {
         <div className="flex items-center gap-4 ml-auto">
           {/* 언어 전환 버튼 */}
           <button
-            onClick={() => changeLanguage(i18n.language === "ko" ? "en" : "ko")}
+            onClick={() => {
+              changeLanguage(i18n.language === "ko" ? "en" : "ko");
+            }}
             className="flex items-center gap-2 px-4 py-2 border border-[#888888] rounded-lg hover:border-[#38b000] hover:bg-[#f0fdf4] transition-colors"
             aria-label="언어 전환"
           >
@@ -227,19 +248,17 @@ export default function MyCalendar() {
       {/* 메인 콘텐츠 */}
       <main className="relative z-10 px-10 mx-30 auto py-30 max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#222222] mb-2">내 캘린더</h1>
-          <p className="text-[#888888]">
-            저장한 일정을 확인하고 관리할 수 있습니다
-          </p>
+          <h1 className="text-4xl font-bold text-[#222222] mb-2">
+            {t("myCalendar")}
+          </h1>
+          <p className="text-[#888888]">{t("calendarDescription")}</p>
         </div>
 
         {/* 일정이 없는 경우 */}
         {events.length === 0 ? (
           <div className="py-20 text-center">
             <div className="mb-4 text-6xl">📅</div>
-            <p className="text-xl text-[#888888] mb-2">
-              저장된 일정이 없습니다
-            </p>
+            <p className="text-xl text-[#888888] mb-2">{t("noSavedEvent")}</p>
             <p className="text-[#888888] mb-8">
               행사 상세 페이지에서 일정을 추가해보세요
             </p>
@@ -268,26 +287,27 @@ export default function MyCalendar() {
                 view={view}
                 onView={setView}
                 messages={{
-                  next: "다음",
-                  previous: "이전",
-                  today: "오늘",
-                  month: "월",
-                  week: "주",
-                  day: "일",
-                  agenda: "일정",
-                  date: "날짜",
-                  time: "시간",
-                  event: "이벤트",
-                  noEventsInRange: "이 기간에는 일정이 없습니다.",
-                  showMore: (total) => `+${total} 더보기`,
+                  next: t("next"),
+                  previous: t("before"),
+                  today: t("today"),
+                  month: t("month"),
+                  week: t("week"),
+                  day: t("day"),
+                  agenda: t("schedule"),
+                  date: t("date"),
+                  time: t("time"),
+                  event: t("evnet"),
+                  noEventsInRange: t("noEventsInRange"),
+                  showMore: (total) => `+${total} ${t("more")}`,
                 }}
+                formats={customFormats}
               />
             </div>
 
             {/* 카테고리 범례 */}
             <div className="p-6 bg-white shadow-lg rounded-xl">
               <h3 className="text-lg font-bold text-[#222222] mb-4">
-                카테고리
+                {t("category")}
               </h3>
               <div className="flex flex-wrap gap-4">
                 {Object.entries(categoryColors).map(([category, color]) => (
