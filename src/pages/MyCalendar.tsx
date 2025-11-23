@@ -247,13 +247,13 @@ export default function MyCalendar() {
             <div className="mb-4 text-6xl">📅</div>
             <p className="text-xl text-[#888888] mb-2">{t("noSavedEvent")}</p>
             <p className="text-[#888888] mb-8">
-              행사 상세 페이지에서 일정을 추가해보세요
+              {t("BlankCalendarDescription")}
             </p>
             <button
               onClick={() => navigate("/")}
               className="px-6 py-3 bg-[#38b000] text-white rounded-lg font-semibold hover:bg-[#2d8c00] transition-colors"
             >
-              행사 둘러보기
+              {t("BrowseEvents")}
             </button>
           </div>
         ) : (
@@ -272,15 +272,13 @@ export default function MyCalendar() {
                 onSelectEvent={handleSelectEvent}
                 eventPropGetter={eventStyleGetter}
                 view={view}
-                views={["month", "agenda"]} // 월별 일정, 전체 일정만 보이도록
+                views={["month", "agenda"]}
                 onView={setView}
                 messages={{
                   next: t("next"),
                   previous: t("before"),
                   today: t("today"),
                   month: t("month"),
-                  // week: t("week"),
-                  // day: t("day"),
                   agenda: t("schedule"),
                   date: t("date"),
                   time: t("time"),
@@ -356,7 +354,7 @@ export default function MyCalendar() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm text-[#888888] mb-1">
-                    날짜
+                    {t("date")}
                   </label>
                   <input
                     type="date"
@@ -370,13 +368,13 @@ export default function MyCalendar() {
                     onClick={handleEditSave}
                     className="flex-1 px-4 py-2 bg-[#38b000] text-white rounded-lg font-semibold hover:bg-[#2d8c00] transition-colors"
                   >
-                    저장
+                    {t("save")}
                   </button>
                   <button
                     onClick={handleEditCancel}
                     className="flex-1 px-4 py-2 bg-[#888888] text-white rounded-lg font-semibold hover:bg-[#666666] transition-colors"
                   >
-                    취소
+                    {t("cancel")}
                   </button>
                 </div>
               </div>
@@ -390,11 +388,11 @@ export default function MyCalendar() {
                   </div>
                   <div className="flex items-center gap-3 text-[#444444]">
                     <span className="text-xl">⏰</span>
-                    <span>{selectedEvent.time || "시간 미정"}</span>
+                    <span>{selectedEvent.time || t("timeTBD")}</span>
                   </div>
                   <div className="flex items-center gap-3 text-[#444444]">
                     <span className="text-xl">📍</span>
-                    <span>{selectedEvent.place}</span>
+                    <span>{selectedEvent.place || t("locationTBD")}</span>
                   </div>
                 </div>
                 <div className="flex gap-2 pt-4 border-t border-gray-200">
@@ -402,13 +400,13 @@ export default function MyCalendar() {
                     onClick={handleEditStart}
                     className="flex-1 px-4 py-2 bg-white border border-[#38b000] text-[#38b000] rounded-lg font-semibold hover:bg-[#38b000] hover:text-white transition-colors"
                   >
-                    수정
+                    {t("edit")}
                   </button>
                   <button
                     onClick={handleDelete}
                     className="flex-1 px-4 py-2 font-semibold text-red-500 transition-colors bg-white border border-red-500 rounded-lg hover:bg-red-500 hover:text-white"
                   >
-                    삭제
+                    {t("delete")}
                   </button>
                 </div>
               </div>

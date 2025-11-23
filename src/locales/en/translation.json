@@ -61,5 +61,18 @@
   "fri": "fri",
   "sat": "sat",
 
+  "BlankCalendarDescription": "Add your schedule on the event details page",
+  "BrowseEvents": "Browse Events",
+
+  "edit": "Edit",
+  "delete": "Delete",
+  "cancel": "Cancel",
+  "save": "Save",
+
+  "timeTBD": "Time TBD",
+  "locationTBD": "Location TBD",
+
+  "date": "Date",
+
   "greeting":"welcome, {{email}} 님!"
 }
