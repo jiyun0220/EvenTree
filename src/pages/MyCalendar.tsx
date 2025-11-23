@@ -9,6 +9,8 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../calendar.css";
 import { useTranslation } from "react-i18next";
 import type { Formats } from "react-big-calendar";
+import { useEvents } from "../hooks/useEvents";
+import type { EventData } from "../services/eventService";
 
 interface CalendarEvent {
   id: string;
@@ -31,33 +33,7 @@ export default function MyCalendar() {
     i18n.changeLanguage(lng);
   };
 
-  // 더미 데이터 (추후 서버 연결 시 제거)
-  const [events, setEvents] = useState<CalendarEvent[]>([
-    {
-      id: "1",
-      title: "2024 방탄소년단 콘서트",
-      date: "2024-12-25",
-      time: "19:00",
-      place: "서울 올림픽공원",
-      category: "대중음악",
-    },
-    {
-      id: "2",
-      title: "신년 음악회",
-      date: "2025-01-01",
-      time: "15:00",
-      place: "예술의전당 콘서트홀",
-      category: "클래식",
-    },
-    {
-      id: "3",
-      title: "뮤지컬 오페라의 유령",
-      date: "2025-02-14",
-      time: "18:00",
-      place: "샤롯데씨어터",
-      category: "뮤지컬",
-    },
-  ]);
+  const { events, loading, error, setEvents } = useEvents();
 
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
@@ -93,13 +69,10 @@ export default function MyCalendar() {
       return t(`${date.getMonth() + 1}`);
     },
   };
-
-  // 캘린더 이벤트 형식으로 변환
+  
   const calendarEvents = useMemo(() => {
     return events.map((event) => {
-      const dateTime = event.time
-        ? new Date(`${event.date}T${event.time}`)
-        : new Date(event.date);
+      const dateTime = new Date(event.date); // time 없음 → 날짜만 사용
       return {
         ...event,
         start: dateTime,
@@ -316,7 +289,9 @@ export default function MyCalendar() {
                       className="w-4 h-4 rounded"
                       style={{ backgroundColor: color }}
                     />
-                    <span className="text-sm text-[#444444]">{category}</span>
+                    <span className="text-sm text-[#444444]">
+                      {t(category)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -346,7 +321,7 @@ export default function MyCalendar() {
                         categoryColors["기타"],
                     }}
                   >
-                    {selectedEvent.category}
+                    {t(selectedEvent.category || "기타")}
                   </span>
                 </div>
                 <h3 className="text-2xl font-bold text-[#222222]">
