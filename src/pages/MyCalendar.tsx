@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import type { Formats } from "react-big-calendar";
 import { useEvents } from "../hooks/useEvents";
 import type { EventData } from "../services/eventService";
+import { useUpdateEvent } from "../hooks/useUpdateEvent";
 
 interface CalendarEvent {
   id: string;
@@ -34,6 +35,7 @@ export default function MyCalendar() {
   };
 
   const { events, loading, error, setEvents } = useEvents();
+  const { update, loading: updateLoading, error: updateError } = useUpdateEvent();
 
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
@@ -133,23 +135,29 @@ export default function MyCalendar() {
     if (!selectedEvent) return;
     setEditingId(selectedEvent.id);
     setEditDate(selectedEvent.date);
-    setEditTime(selectedEvent.time || "");
   };
 
   // 수정 저장
-  const handleEditSave = () => {
+  const handleEditSave = async () => {
     if (!editingId) return;
-    // TODO: 서버 API 호출
-    setEvents(
-      events.map((event) =>
-        event.id === editingId
-          ? { ...event, date: editDate, time: editTime }
-          : event
-      )
-    );
-    setEditingId(null);
-    setSelectedEvent(null);
-    toast.success("일정이 수정되었습니다");
+    try {
+      // 서버에 새로운 날짜 업데이트
+      await update(editingId, editDate); // date만 서버로 보내기
+      // 클라이언트 상태 업데이트
+      setEvents(
+        events.map((event) =>
+          event.id === editingId
+            ? { ...event, date: editDate, time: editTime }
+            : event
+        )
+      );
+      setEditingId(null);
+      setSelectedEvent(null);
+      toast.success("일정이 수정되었습니다");
+    } catch (err) {
+      console.error(err);
+      toast.error("일정 수정에 실패했습니다");
+    }
   };
 
   // 수정 취소
@@ -347,17 +355,6 @@ export default function MyCalendar() {
                     type="date"
                     value={editDate}
                     onChange={(e) => setEditDate(e.target.value)}
-                    className="w-full px-4 py-2 border border-[#888888] rounded-lg focus:outline-none focus:border-[#38b000]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm text-[#888888] mb-1">
-                    시간
-                  </label>
-                  <input
-                    type="time"
-                    value={editTime}
-                    onChange={(e) => setEditTime(e.target.value)}
                     className="w-full px-4 py-2 border border-[#888888] rounded-lg focus:outline-none focus:border-[#38b000]"
                   />
                 </div>
