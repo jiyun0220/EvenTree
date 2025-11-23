@@ -12,6 +12,7 @@ import type { Formats } from "react-big-calendar";
 import { useEvents } from "../hooks/useEvents";
 import type { EventData } from "../services/eventService";
 import { useUpdateEvent } from "../hooks/useUpdateEvent";
+import { useDeleteEvent } from "../hooks/useDeleteEvent";
 
 interface CalendarEvent {
   id: string;
@@ -36,6 +37,7 @@ export default function MyCalendar() {
 
   const { events, loading, error, setEvents } = useEvents();
   const { update, loading: updateLoading, error: updateError } = useUpdateEvent();
+  const { remove, loading: deleteLoading, error: deleteError } = useDeleteEvent();
 
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
     null
@@ -168,12 +170,17 @@ export default function MyCalendar() {
   };
 
   // 삭제
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!selectedEvent) return;
-    // TODO: 서버 API 호출
-    setEvents(events.filter((event) => event.id !== selectedEvent.id));
-    setSelectedEvent(null);
-    toast.success("일정이 삭제되었습니다");
+    try {
+      await remove(selectedEvent.id); // 서버에 삭제 요청
+      setEvents(events.filter((event) => event.id !== selectedEvent.id)); // 클라이언트 상태 업데이트
+      setSelectedEvent(null);
+      toast.success("일정이 삭제되었습니다");
+    } catch (err) {
+      console.error(err);
+      toast.error("일정 삭제에 실패했습니다");
+    }
   };
 
   // 모달 닫기
